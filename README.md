@@ -19,6 +19,9 @@ The code presents a pre-existing database, which includes 20 parameters extracte
 
 
 ![imaggithub](https://github.com/user-attachments/assets/3f6c6d09-7238-4e2d-9ac7-89fe647656d3 =50x50)
+<img src="https://github.com/user-attachments/assets/3f6c6d09-7238-4e2d-9ac7-89fe647656d3" width="50" height="50">
+
+
 
 
 ## Software Libraries
