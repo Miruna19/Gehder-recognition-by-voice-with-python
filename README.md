@@ -39,7 +39,7 @@ The LabelEncoder class from the sklearn library is used to transform the values 
 
 
 ![image](https://github.com/user-attachments/assets/8e1e7994-6640-4335-8e27-a6d4aa7a7e4d)
-<img src="https://github.com/user-attachments/assets/8e1e7994-6640-4335-8e27-a6d4aa7a7e4d" width="150" height="150">
+<img src="https://github.com/user-attachments/assets/8e1e7994-6640-4335-8e27-a6d4aa7a7e4d" width="400" height="250">
 
 
 
