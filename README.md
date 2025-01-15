@@ -38,7 +38,6 @@ The code presents a pre-existing database, which includes 20 parameters extracte
 The LabelEncoder class from the sklearn library is used to transform the values of the labels, i.e., the "label" column, from text format to numeric format. Using the `fit_transform` method, the LabelEncoder model is adjusted to the "label" column, and the labels are transformed into numeric values. The `fit_transform` method is applied to the "label" column because we want to convert the gender labels, "female" and "male", into numeric values. Therefore, the "female" label will be transformed into the numeric value 0, and the "male" label will be transformed into the numeric value 1.
 
 
-![image](https://github.com/user-attachments/assets/8e1e7994-6640-4335-8e27-a6d4aa7a7e4d)
 <img src="https://github.com/user-attachments/assets/8e1e7994-6640-4335-8e27-a6d4aa7a7e4d" width="400" height="250">
 
 
