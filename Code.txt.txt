@@ -1,0 +1,361 @@
+
+
+## Gender Recognition From Vocal Data  
+
+Given *vocal data from various people*, let's try to predict the **gender** of a given person.  
+
+
+# Getting Started
+
+from google.colab import drive
+drive.mount('/content/drive')
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+from sklearn.preprocessing import LabelEncoder, StandardScaler
+from sklearn.model_selection import train_test_split
+
+import tensorflow as tf
+
+data = pd.read_csv('/content/drive/MyDrive/Colab Notebooks/Psv/voice.csv')
+#data.head()
+
+data
+
+Numarul de mostre pe genuri
+
+data['label'].value_counts()
+
+Versiune Python
+
+import sys
+print(sys.version)
+
+
+data.info()
+
+# Encoding Labels
+
+Convertirea etichetelor male si female în 0 și 1.
+
+label_encoder = LabelEncoder()
+
+data['label'] = label_encoder.fit_transform(data['label'])
+
+dict(enumerate(label_encoder.classes_))
+
+Noul tabel în care ultima coloana a fost modificata și acum contine 0 pentru female și 1 pentru male
+
+data
+
+# Splitting and Scaling
+
+y = data['label'].copy()
+X = data.drop('label', axis=1).copy()
+
+
+scaler = StandardScaler()
+
+X = scaler.fit_transform(X)
+
+X
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=0.7, random_state=42)
+
+# Modeling and Training
+
+X.shape
+
+y.shape
+
+inputs = tf.keras.Input(shape=(X.shape[1],))
+
+x = tf.keras.layers.Dense(64, activation='relu')(inputs)
+x = tf.keras.layers.Dense(64, activation='relu')(x)
+
+outputs = tf.keras.layers.Dense(1, activation='sigmoid')(x)
+
+model = tf.keras.Model(inputs, outputs)
+
+model.summary()
+
+model.compile(
+    optimizer='adam',
+    loss='binary_crossentropy',
+    metrics=[
+        'accuracy',
+        tf.keras.metrics.AUC(name='auc')
+    ]
+)
+
+history = model.fit(
+    X_train,
+    y_train,
+    validation_split=0.2,
+    batch_size=32,
+    epochs=100,
+    callbacks=[
+        tf.keras.callbacks.EarlyStopping(
+            monitor='val_loss',
+            patience=3,
+            restore_best_weights=True
+        )
+    ]
+)
+
+import matplotlib.pyplot as plt
+
+epochs = range(1, 20)  # Numărul total de epoci
+
+train_loss = [0.4645, 0.1868, 0.1017, 0.0779, 0.0675, 0.0632, 0.0599, 0.0582, 0.0540, 0.0501, 0.0482, 0.0461, 0.0427, 0.0417, 0.0423, 0.0389, 0.0356, 0.0360, 0.0340]  # Loss-urile de antrenare
+val_loss = [0.2663, 0.1132, 0.0722, 0.0600, 0.0566, 0.0543, 0.0576, 0.0581, 0.0526, 0.0571, 0.0491, 0.0474, 0.0478, 0.0477, 0.0444, 0.0440, 0.0492, 0.0509, 0.0454]  # Loss-urile de evaluare
+train_accuracy = [0.7778, 0.9532, 0.9695, 0.9741, 0.9786, 0.9769, 0.9797, 0.9803, 0.9825, 0.9836, 0.9836, 0.9859, 0.9865, 0.9859, 0.9853, 0.9882, 0.9882, 0.9898, 0.9882]  # Accuracitățile de antrenare
+val_accuracy = [0.9369, 0.9707, 0.9775, 0.9820, 0.9865, 0.9865, 0.9865, 0.9865, 0.9842, 0.9887, 0.9887, 0.9865, 0.9865, 0.9910, 0.9887, 0.9887, 0.9842, 0.9865, 0.9887]  # Accuracitățile de evaluare
+train_auc = [0.8882, 0.9889, 0.9947, 0.9963, 0.9966, 0.9968, 0.9971, 0.9977, 0.9979, 0.9982, 0.9983, 0.9984, 0.9987, 0.9988, 0.9988, 0.9990, 0.9991, 0.9991, 0.9993]  # AUC-urile de antrenare
+val_auc = [0.9902, 0.9948, 0.9972, 0.9978, 0.9974, 0.9978, 0.9970, 0.9966, 0.9969, 0.9967, 0.9973, 0.9979, 0.9977, 0.9980, 0.9982, 0.9981, 0.9976, 0.9973, 0.9980]  # AUC-urile de evaluare
+
+plt.plot(epochs, train_loss, 'b-', label='Train Loss')
+plt.plot(epochs, val_loss, 'r-', label='Val Loss')
+plt.plot(epochs, train_accuracy, 'g-', label='Train Accuracy')
+plt.plot(epochs, val_accuracy, 'm-', label='Val Accuracy')
+plt.plot(epochs, train_auc, 'c-', label='Train AUC')
+plt.plot(epochs, val_auc, 'y-', label='Val AUC')
+
+plt.xlabel('Epochs')
+plt.ylabel('Metrics')
+plt.title('Training and Validation Metrics')
+plt.legend()
+
+plt.show()
+
+
+import matplotlib.pyplot as plt
+
+# Obțineți valorile AUC din istoricul antrenării
+train_auc = history.history['auc']
+val_auc = history.history['val_auc']
+
+# Creați graficul
+epochs = range(1, len(train_auc) + 1)
+plt.plot(epochs, train_auc, 'b', label='Train AUC')
+plt.plot(epochs, val_auc, 'r', label='Validation AUC')
+plt.title('AUC Curve')
+plt.xlabel('Epochs')
+plt.ylabel('AUC')
+plt.legend()
+plt.show()
+
+
+import matplotlib.pyplot as plt
+
+# Definirea datelor de antrenare
+epoch = range(1, len(history.history['loss']) + 1)
+loss = history.history['loss']
+accuracy = history.history['accuracy']
+
+# Crearea graficului
+plt.figure(figsize=(8, 4))
+plt.plot(epoch, loss, 'b', label='Loss')
+plt.plot(epoch, accuracy, 'r', label='Accuracy')
+plt.title('Evoluția pierderii și acurateței în timpul antrenării')
+plt.xlabel('Epocă')
+plt.ylabel('Valoare')
+plt.legend()
+plt.show()
+
+
+model.evaluate(X_test, y_test)
+
+!pip install pydub
+from pydub import AudioSegment
+
+# incarca fisierul audio MP4
+audio = AudioSegment.from_file("/content/drive/MyDrive/Colab Notebooks/Psv/fisier_audio.mp4", "mp4")
+
+# salveaza fisierul audio ca WAV
+audio.export("/content/drive/MyDrive/Colab Notebooks/Psv/fisier_audio.wav", format="wav")
+
+import wave
+
+import wave as w
+
+input_wav_file = '/content/drive/MyDrive/Colab Notebooks/Psv/fisier_audio.wav'
+wav_struct = wave.open(input_wav_file, 'r')   
+
+# Returnează frecvența de eșantionare
+sampling_frequency = wav_struct.getframerate()
+print ("The sampling frequency of the file is: %d [Hz]" %sampling_frequency)
+
+# Returnează numărul de biți pe care e stocat un eșantion
+bit_depth = wav_struct.getsampwidth()
+print ("The sample width of the file is: %d [bytes/sample] or %d [bits/sample]"\
+       %(bit_depth, bit_depth*8))
+
+# Returnează numărul de canale
+no_channels = wav_struct.getnchannels()
+print ("The number of channels in the file is %d or %s" \
+       %(no_channels, 'mono' if no_channels==1 else 'stereo'))
+
+# Retunează numărul de eșantioane
+nframes = wav_struct.getnframes()
+print ("The number of samples in the file is: %d" %nframes)
+
+# Returnează tipul compresiei. Pentru fișiere wav, aceasta este 'None'
+compression_type = wav_struct.getcomptype()
+print ("The compression type of the file is: %s " %compression_type)
+
+
+
+# Închidem fluxul de fișier
+wav_struct.close()
+
+import IPython
+IPython.display.Audio(wav_data, rate=sampling_frequency)
+
+from pydub import AudioSegment
+
+audio = AudioSegment.from_wav("/content/drive/MyDrive/Colab Notebooks/Psv/fisier_audio.wav")
+
+model.save('model_f.h5')
+
+
+!ls
+
+!pip install tensorflow
+
+from tensorflow.keras.models import load_model
+#import tensorflow.keras.models as models
+
+model = load_model("/content/drive/MyDrive/Colab Notebooks/Psv/model_f.h5")
+
+print (inputs.shape)
+
+import librosa
+import numpy as np
+import pandas as pd
+from scipy.stats import skew
+from scipy.stats import kurtosis
+from scipy.stats import entropy
+from scipy.signal import find_peaks
+
+# Funcție pentru extragerea caracteristicilor din semnalul vocal
+def extract_features(signal, sample_rate):
+    meanfreq = librosa.feature.spectral_centroid(y=signal, sr=sample_rate).mean() / 1000
+    sd = librosa.feature.spectral_bandwidth(y=signal, sr=sample_rate).std()
+    median = np.median(librosa.feature.spectral_centroid(y=signal, sr=sample_rate)) / 1000
+    q25 = np.percentile(librosa.feature.spectral_centroid(y=signal, sr=sample_rate), 25) / 1000
+    q75 = np.percentile(librosa.feature.spectral_centroid(y=signal, sr=sample_rate), 75) / 1000
+    iqr = q75 - q25
+    skew_value = skew(signal)
+    kurt_value = kurtosis(signal)
+    sp_ent_value = entropy(signal).mean()
+    sfm = librosa.feature.spectral_flatness(y=signal).mean()
+    mod = librosa.feature.spectral_rolloff(y=signal).mean()
+    centroid = librosa.feature.spectral_centroid(y=signal).mean() / 1000
+    peakf = find_peaks(signal)[0]
+    print(peakf)
+    peakf=np.mean(find_peaks(signal)[0])
+    meanfun = librosa.feature.mfcc(y=signal).mean()
+    minfun = librosa.feature.mfcc(y=signal).min()
+    maxfun = librosa.feature.mfcc(y=signal).max()
+    meandom = librosa.feature.mfcc(y=signal).mean()
+    mindom = librosa.feature.mfcc(y=signal).min()
+    dfrange = librosa.feature.mfcc(y=signal).max() - librosa.feature.mfcc(y=signal).min()
+    modindx = np.abs(np.diff(librosa.feature.mfcc(y=signal))).mean() / dfrange
+
+    
+    # Afișați valorile caracteristicilor
+    print("meanfreq:", meanfreq)
+    print("sd:", sd)
+    print("median:", median)
+    print("Q25:", q25)
+    print("Q75:", q75)
+    print("IQR:", iqr)
+    print("skew:", skew_value)
+    print("kurt:", kurt_value)
+    print("sp.ent:", sp_ent_value)
+    print("sfm:", sfm)
+    print("mod:", mod)
+    print("centroid:", centroid)
+    print("peakf:", peakf)
+    print("meanfun:", meanfun)
+    print("minfun:", minfun)
+    print("maxfun:", maxfun)
+    print("meandom:", meandom)
+    print("mindom:", mindom)
+    print("dfrange:", dfrange)
+    print("modindx:", modindx)
+   # Returnarea caracteristicilor sub forma unui dicționar
+    features = {
+        'meanfreq': meanfreq,
+        'sd': sd,
+        'median': median,
+        'Q25': q25,
+        'Q75': q75,
+        'IQR': iqr,
+        'skew': skew_value,
+        'kurt': kurt_value,
+        'sp.ent': sp_ent_value,
+        'sfm': sfm,
+        'mod': mod,
+        'centroid': centroid,
+        'peakf': peakf,
+        'meanfun': meanfun,
+        'minfun': minfun,
+        'maxfun': maxfun,
+        'meandom': meandom,
+        'mindom': mindom,
+        'dfrange': dfrange,
+        'modindx': modindx
+    }
+    print(features)
+    
+    return features
+
+# Definiți calea către fișierul audio
+file_path = '/content/drive/MyDrive/Colab Notebooks/Psv/fisier_audio.wav'
+
+# Încărcați semnalul vocal utilizând librosa
+signal, sample_rate = librosa.load(file_path, sr=None)
+features=extract_features(signal,sample_rate)
+
+
+# Extrageți caracteristicile din semnalul vocal
+#features = extract_features(signal, sample_rate)
+
+
+# Creați un DataFrame din dicționarul de caracteristici
+#df = pd.DataFrame(features, index=[0])
+
+# Afișați DataFrame-ul cu caracteristici
+#print(df)
+
+
+#print(df)
+
+# Extrageți caracteristicile din semnalul vocal
+import tensorflow
+features = extract_features(signal, sample_rate)
+
+# Rearanjați caracteristicile și creați un DataFrame
+
+df = pd.DataFrame(features, index=[0])
+
+# Salvare în fișierul CSV
+df.to_csv('caracteristici_vocale.csv', index=False)
+
+# Reshape la dimensiunea dorită
+df = df.values.reshape(-1, 20)
+print(df[0])
+# Utilizați modelul încărcat pentru predicție
+#data=tf.convert_to_tensor(data)
+features = tf.convert_to_tensor(df, dtype=tensorflow.float32)
+predictions=model.predict(features)
+
+# Convertiți predicțiile în etichete de gen
+gender_labels = ['Male' if pred > 0.5 else 'Female' for pred in predictions]
+
+# Afișați rezultatele
+print(gender_labels)
