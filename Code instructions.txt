@@ -1,0 +1,9 @@
+Instructions for Using the Code:
+
+To open the project, you need to install an application capable of running Python code, or you can use Google Colab: https://colab.research.google.com/, which requires signing in with your Google account.
+Import the database, which is a .csv file containing vocal samples from multiple individuals. It is a preprocessed database with specific acoustic features extracted for gender classification.
+Execute each cell in chronological order; skipping any cell will result in an error.
+Observe the output of each cell and interpret the results.
+At line 139, insert an audio file containing the desired voice recording.
+Continue running the code.
+Finally, you will be able to view the desired result (gender detection: female/male).
